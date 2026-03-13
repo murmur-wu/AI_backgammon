@@ -59,4 +59,24 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Deployment
 
-This app is configured for **Cloudflare Pages** deployment via `wrangler.toml`.
+### Cloudflare Pages
+
+This app is deployed to **Cloudflare Pages** using the [`@cloudflare/next-on-pages`](https://github.com/cloudflare/next-on-pages) adapter.
+
+**Option 1: Deploy via Cloudflare Dashboard**
+
+1. Push the repository to GitHub.
+2. In the [Cloudflare Pages dashboard](https://pages.cloudflare.com/), create a new project connected to the GitHub repo.
+3. Set the build settings:
+   - **Build command:** `npx @cloudflare/next-on-pages`
+   - **Build output directory:** `.vercel/output/static`
+   - **Node.js version:** `20`
+
+**Option 2: Deploy via Wrangler CLI**
+
+```bash
+npm run build:cloudflare   # runs: npx @cloudflare/next-on-pages
+npx wrangler pages deploy .vercel/output/static --project-name gomoku
+```
+
+The `wrangler.toml` configuration file is included in this repository.
