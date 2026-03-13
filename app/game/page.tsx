@@ -7,7 +7,7 @@ import Controls from '@/components/Controls';
 import Link from 'next/link';
 import { GameState, Position } from '@/types';
 import { createBoard, placeStone, isValidMove } from '@/lib/game/board';
-import { checkWinner } from '@/lib/game/winner';
+import { checkWinner, getWinningLine } from '@/lib/game/winner';
 import { checkDraw } from '@/lib/game/draw';
 import { undoMove } from '@/lib/game/undo';
 import { getAIMove } from '@/lib/ai/ai';
@@ -15,6 +15,7 @@ import { getAIMove } from '@/lib/ai/ai';
 interface ExtendedGameState extends GameState {
   isAIThinking: boolean;
   lastMove: Position | null;
+  winningLine: Position[] | null;
 }
 
 type Action =
@@ -33,6 +34,7 @@ function createInitialState(): ExtendedGameState {
     isGameOver: false,
     isAIThinking: false,
     lastMove: null,
+    winningLine: null,
   };
 }
 
@@ -56,6 +58,7 @@ function reducer(state: ExtendedGameState, action: Action): ExtendedGameState {
         isGameOver: !!winner || isDraw,
         isAIThinking: !winner && !isDraw,
         lastMove: { row: action.row, col: action.col },
+        winningLine: winner ? getWinningLine(newBoard, action.row, action.col) : null,
       };
     }
     case 'AI_MOVE': {
@@ -75,6 +78,7 @@ function reducer(state: ExtendedGameState, action: Action): ExtendedGameState {
         isGameOver: !!winner || isDraw,
         isAIThinking: false,
         lastMove: { row: aiPos.row, col: aiPos.col },
+        winningLine: winner ? getWinningLine(newBoard, aiPos.row, aiPos.col) : null,
       };
     }
     case 'RESTART':
@@ -93,6 +97,7 @@ function reducer(state: ExtendedGameState, action: Action): ExtendedGameState {
         isGameOver: false,
         isAIThinking: false,
         lastMove: lastPos ?? null,
+        winningLine: null,
       };
     }
     default:
@@ -131,8 +136,8 @@ export default function GamePage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <Link href="/" className="text-amber-800 hover:text-amber-900 font-semibold transition-colors">
             ← Back
           </Link>
@@ -147,12 +152,13 @@ export default function GamePage() {
           isAIThinking={state.isAIThinking}
         />
 
-        <div className="flex justify-center my-6">
+        <div className="flex justify-center my-3 sm:my-6">
           <Board
             board={state.board}
             onCellClick={handleCellClick}
             disabled={state.isGameOver || state.isAIThinking}
             lastMove={state.lastMove}
+            winningLine={state.winningLine}
           />
         </div>
 

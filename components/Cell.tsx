@@ -9,9 +9,8 @@ interface CellProps {
   onClick: (row: number, col: number) => void;
   disabled: boolean;
   isLast?: boolean;
+  cellSize?: number;
 }
-
-const CELL_SIZE = 36;
 
 const STAR_POINTS: [number, number][] = [
   [3, 3], [3, 7], [3, 11],
@@ -19,14 +18,14 @@ const STAR_POINTS: [number, number][] = [
   [11, 3], [11, 7], [11, 11],
 ];
 
-export default function Cell({ stone, row, col, onClick, disabled, isLast = false }: CellProps) {
+export default function Cell({ stone, row, col, onClick, disabled, isLast = false, cellSize = 36 }: CellProps) {
   const canClick = !disabled && stone === null;
 
   return (
     <div
       data-testid={`cell-${row}-${col}`}
       className="relative flex items-center justify-center"
-      style={{ width: CELL_SIZE, height: CELL_SIZE }}
+      style={{ width: cellSize, height: cellSize }}
       onClick={() => canClick && onClick(row, col)}
     >
       {/* Grid lines */}
@@ -71,7 +70,7 @@ export default function Cell({ stone, row, col, onClick, disabled, isLast = fals
             }
             ${isLast ? 'ring-2 ring-red-500 ring-offset-1' : ''}
           `}
-          style={{ width: CELL_SIZE - 4, height: CELL_SIZE - 4 }}
+          style={{ width: cellSize - 4, height: cellSize - 4 }}
           aria-label={`${stone} stone at row ${row}, column ${col}`}
         />
       )}
@@ -80,7 +79,7 @@ export default function Cell({ stone, row, col, onClick, disabled, isLast = fals
       {canClick && (
         <div
           className="absolute rounded-full bg-gray-800 opacity-0 hover:opacity-20 z-10 cursor-pointer transition-opacity"
-          style={{ width: CELL_SIZE - 4, height: CELL_SIZE - 4 }}
+          style={{ width: cellSize - 4, height: cellSize - 4 }}
         />
       )}
     </div>
