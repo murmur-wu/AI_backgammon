@@ -19,7 +19,8 @@ export function undoMove(
   // Rebuild board from history
   let newBoard = createBoard();
   for (let i = 0; i < newHistory.length; i++) {
-    const pos = newHistory[i]!;
+    // newHistory[i] is always defined since we iterate within its bounds
+    const pos = newHistory[i] as Position;
     const stone = i % 2 === 0 ? 'black' : 'white';
     newBoard = placeStone(newBoard, pos.row, pos.col, stone);
   }

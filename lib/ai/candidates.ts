@@ -34,7 +34,8 @@ export function getCandidates(board: Board): Position[] {
   }
 
   return Array.from(candidates).map((key) => {
-    const [row, col] = key.split(',').map(Number);
-    return { row: row!, col: col! };
+    // Key format is always "row,col" (controlled internally), so split always yields two numeric strings
+    const parts = key.split(',');
+    return { row: Number(parts[0]), col: Number(parts[1]) };
   });
 }
