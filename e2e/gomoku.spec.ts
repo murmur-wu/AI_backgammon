@@ -10,7 +10,7 @@ test.describe('Gomoku Game', () => {
   test('user clicks start game - navigates to /game', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('link', { name: /Start Game/i }).click();
-    await expect(page).toHaveURL('/game');
+    await expect(page).toHaveURL(/\/game/);
     await expect(page.getByTestId('game-board')).toBeVisible();
   });
 
