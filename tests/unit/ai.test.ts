@@ -60,3 +60,82 @@ describe('getAIMove', () => {
     ).toBe(true);
   });
 });
+
+describe('getAIMove with difficulty', () => {
+  it('easy mode returns a valid move', () => {
+    let board = createBoard();
+    board = placeStone(board, 7, 7, 'black');
+    const move = getAIMove(board, 'easy');
+    expect(board[move.row][move.col]).toBeNull();
+  });
+
+  it('easy mode blocks an immediate player win', () => {
+    let board = createBoard();
+    board = placeStone(board, 5, 5, 'black');
+    board = placeStone(board, 5, 6, 'black');
+    board = placeStone(board, 5, 7, 'black');
+    board = placeStone(board, 5, 8, 'black');
+
+    const move = getAIMove(board, 'easy');
+    // Even easy mode should block at (5,4) or (5,9)
+    expect(
+      (move.row === 5 && move.col === 4) || (move.row === 5 && move.col === 9)
+    ).toBe(true);
+  });
+
+  it('medium mode selects winning move immediately', () => {
+    let board = createBoard();
+    board = placeStone(board, 7, 7, 'white');
+    board = placeStone(board, 7, 8, 'white');
+    board = placeStone(board, 7, 9, 'white');
+    board = placeStone(board, 7, 10, 'white');
+    board = placeStone(board, 0, 0, 'black');
+
+    const move = getAIMove(board, 'medium');
+    expect(
+      (move.row === 7 && move.col === 6) || (move.row === 7 && move.col === 11)
+    ).toBe(true);
+  });
+
+  it('hard mode selects winning move immediately', () => {
+    let board = createBoard();
+    board = placeStone(board, 7, 7, 'white');
+    board = placeStone(board, 7, 8, 'white');
+    board = placeStone(board, 7, 9, 'white');
+    board = placeStone(board, 7, 10, 'white');
+    board = placeStone(board, 0, 0, 'black');
+
+    const move = getAIMove(board, 'hard');
+    expect(
+      (move.row === 7 && move.col === 6) || (move.row === 7 && move.col === 11)
+    ).toBe(true);
+  });
+
+  it('hard mode blocks player win', () => {
+    let board = createBoard();
+    board = placeStone(board, 5, 5, 'black');
+    board = placeStone(board, 5, 6, 'black');
+    board = placeStone(board, 5, 7, 'black');
+    board = placeStone(board, 5, 8, 'black');
+
+    const move = getAIMove(board, 'hard');
+    expect(
+      (move.row === 5 && move.col === 4) || (move.row === 5 && move.col === 9)
+    ).toBe(true);
+  });
+
+  it('defaults to medium when no difficulty provided', () => {
+    let board = createBoard();
+    board = placeStone(board, 7, 7, 'white');
+    board = placeStone(board, 7, 8, 'white');
+    board = placeStone(board, 7, 9, 'white');
+    board = placeStone(board, 7, 10, 'white');
+    board = placeStone(board, 0, 0, 'black');
+
+    const move = getAIMove(board);
+    expect(
+      (move.row === 7 && move.col === 6) || (move.row === 7 && move.col === 11)
+    ).toBe(true);
+  });
+});
+

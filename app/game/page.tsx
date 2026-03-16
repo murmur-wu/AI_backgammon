@@ -1,11 +1,12 @@
 'use client';
 
-import { useReducer, useEffect, useCallback } from 'react';
+import { useReducer, useEffect, useCallback, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Board from '@/components/Board';
 import GameStatus from '@/components/GameStatus';
 import Controls from '@/components/Controls';
 import Link from 'next/link';
-import { GameState, Position } from '@/types';
+import { GameState, Position, Difficulty } from '@/types';
 import { createBoard, placeStone, isValidMove } from '@/lib/game/board';
 import { checkWinner, getWinningLine } from '@/lib/game/winner';
 import { checkDraw } from '@/lib/game/draw';
@@ -20,7 +21,7 @@ interface ExtendedGameState extends GameState {
 
 type Action =
   | { type: 'PLACE_STONE'; row: number; col: number }
-  | { type: 'AI_MOVE' }
+  | { type: 'AI_MOVE'; difficulty: Difficulty }
   | { type: 'RESTART' }
   | { type: 'UNDO' };
 
@@ -63,7 +64,7 @@ function reducer(state: ExtendedGameState, action: Action): ExtendedGameState {
     }
     case 'AI_MOVE': {
       if (state.isGameOver) return state;
-      const aiPos = getAIMove(state.board);
+      const aiPos = getAIMove(state.board, action.difficulty);
       const newBoard = placeStone(state.board, aiPos.row, aiPos.col, 'white');
       const winner = checkWinner(newBoard, aiPos.row, aiPos.col);
       const isDraw = !winner && checkDraw(newBoard);
@@ -105,7 +106,15 @@ function reducer(state: ExtendedGameState, action: Action): ExtendedGameState {
   }
 }
 
-export default function GamePage() {
+function parseDifficulty(value: string | null): Difficulty {
+  if (value === 'easy' || value === 'hard') return value;
+  return 'medium';
+}
+
+function GamePageInner() {
+  const searchParams = useSearchParams();
+  const difficulty = parseDifficulty(searchParams.get('difficulty'));
+
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
 
   const handleCellClick = useCallback(
@@ -120,11 +129,11 @@ export default function GamePage() {
     if (state.isAIThinking && !state.isGameOver) {
       const delay = 300 + Math.random() * 500;
       const timer = setTimeout(() => {
-        dispatch({ type: 'AI_MOVE' });
+        dispatch({ type: 'AI_MOVE', difficulty });
       }, delay);
       return () => clearTimeout(timer);
     }
-  }, [state.isAIThinking, state.isGameOver]);
+  }, [state.isAIThinking, state.isGameOver, difficulty]);
 
   const handleUndo = useCallback(() => {
     dispatch({ type: 'UNDO' });
@@ -134,6 +143,12 @@ export default function GamePage() {
     dispatch({ type: 'RESTART' });
   }, []);
 
+  const difficultyLabel: Record<Difficulty, string> = {
+    easy: '😊 Easy',
+    medium: '🧠 Medium',
+    hard: '🔥 Hard',
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100">
       <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
@@ -142,7 +157,9 @@ export default function GamePage() {
             ← Back
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">Gomoku</h1>
-          <div className="w-16" />
+          <span className="text-sm font-semibold text-amber-700 bg-amber-100 border border-amber-300 rounded-full px-3 py-1">
+            {difficultyLabel[difficulty]}
+          </span>
         </div>
 
         <GameStatus
@@ -171,3 +188,12 @@ export default function GamePage() {
     </main>
   );
 }
+
+export default function GamePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 flex items-center justify-center" />}>
+      <GamePageInner />
+    </Suspense>
+  );
+}
+

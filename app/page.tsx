@@ -1,6 +1,13 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
+import DifficultySelector from '@/components/DifficultySelector';
+import { Difficulty } from '@/types';
 
 export default function Home() {
+  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 flex flex-col items-center justify-center p-8">
       <div className="text-center max-w-2xl">
@@ -20,9 +27,11 @@ export default function Home() {
           </ul>
         </div>
 
+        <DifficultySelector difficulty={difficulty} onChange={setDifficulty} />
+
         <Link
-          href="/game"
-          className="inline-block px-10 py-4 bg-gray-900 hover:bg-gray-700 text-white text-xl font-bold rounded-xl shadow-lg transition-colors"
+          href={`/game?difficulty=${difficulty}`}
+          className="mt-6 inline-block px-10 py-4 bg-gray-900 hover:bg-gray-700 text-white text-xl font-bold rounded-xl shadow-lg transition-colors"
         >
           Start Game →
         </Link>
@@ -30,3 +39,4 @@ export default function Home() {
     </main>
   );
 }
+
