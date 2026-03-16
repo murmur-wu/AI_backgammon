@@ -1,10 +1,10 @@
 'use client';
 
-import { useReducer, useEffect, useCallback, useState } from 'react';
+import { useReducer, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Board from '@/components/Board';
 import GameStatus from '@/components/GameStatus';
 import Controls from '@/components/Controls';
-import DifficultySelector from '@/components/DifficultySelector';
 import Link from 'next/link';
 import { GameState, Position, Difficulty } from '@/types';
 import { createBoard, placeStone, isValidMove } from '@/lib/game/board';
@@ -106,9 +106,16 @@ function reducer(state: ExtendedGameState, action: Action): ExtendedGameState {
   }
 }
 
+function parseDifficulty(value: string | null): Difficulty {
+  if (value === 'easy' || value === 'hard') return value;
+  return 'medium';
+}
+
 export default function GamePage() {
+  const searchParams = useSearchParams();
+  const difficulty = parseDifficulty(searchParams.get('difficulty'));
+
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
-  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
 
   const handleCellClick = useCallback(
     (row: number, col: number) => {
@@ -136,14 +143,11 @@ export default function GamePage() {
     dispatch({ type: 'RESTART' });
   }, []);
 
-  const handleDifficultyChange = useCallback(
-    (newDifficulty: Difficulty) => {
-      setDifficulty(newDifficulty);
-      // Restart the game when difficulty changes so the new setting takes effect immediately
-      dispatch({ type: 'RESTART' });
-    },
-    []
-  );
+  const difficultyLabel: Record<Difficulty, string> = {
+    easy: '😊 Easy',
+    medium: '🧠 Medium',
+    hard: '🔥 Hard',
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100">
@@ -153,14 +157,10 @@ export default function GamePage() {
             ← Back
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">Gomoku</h1>
-          <div className="w-16" />
+          <span className="text-sm font-semibold text-amber-700 bg-amber-100 border border-amber-300 rounded-full px-3 py-1">
+            {difficultyLabel[difficulty]}
+          </span>
         </div>
-
-        <DifficultySelector
-          difficulty={difficulty}
-          onChange={handleDifficultyChange}
-          disabled={state.isAIThinking}
-        />
 
         <GameStatus
           winner={state.winner}

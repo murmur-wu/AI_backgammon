@@ -1,6 +1,18 @@
-import Link from 'next/link';
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import DifficultySelector from '@/components/DifficultySelector';
+import { Difficulty } from '@/types';
 
 export default function Home() {
+  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
+  const router = useRouter();
+
+  const handleStart = () => {
+    router.push(`/game?difficulty=${difficulty}`);
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 flex flex-col items-center justify-center p-8">
       <div className="text-center max-w-2xl">
@@ -20,13 +32,16 @@ export default function Home() {
           </ul>
         </div>
 
-        <Link
-          href="/game"
-          className="inline-block px-10 py-4 bg-gray-900 hover:bg-gray-700 text-white text-xl font-bold rounded-xl shadow-lg transition-colors"
+        <DifficultySelector difficulty={difficulty} onChange={setDifficulty} />
+
+        <button
+          onClick={handleStart}
+          className="mt-6 inline-block px-10 py-4 bg-gray-900 hover:bg-gray-700 text-white text-xl font-bold rounded-xl shadow-lg transition-colors"
         >
           Start Game →
-        </Link>
+        </button>
       </div>
     </main>
   );
 }
+
