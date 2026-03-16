@@ -1,10 +1,30 @@
-import { Board, Position } from '@/types';
+import { Board, Position, Difficulty } from '@/types';
 import { placeStone, isValidMove } from '@/lib/game/board';
 import { checkWinner } from '@/lib/game/winner';
 import { getCandidates } from './candidates';
 import { scorePosition } from './scoring';
+import { getAIMoveHard } from './minimax';
 
-export function getAIMove(board: Board): Position {
+function getAIMoveEasy(board: Board): Position {
+  const candidates = getCandidates(board).filter(({ row, col }) => isValidMove(board, row, col));
+
+  if (candidates.length === 0) {
+    const center = Math.floor(15 / 2);
+    return { row: center, col: center };
+  }
+
+  // Still block an immediate player win so easy mode isn't trivially beatable
+  for (const { row, col } of candidates) {
+    const testBoard = placeStone(board, row, col, 'black');
+    if (checkWinner(testBoard, row, col) === 'black') return { row, col };
+  }
+
+  // Pick a random candidate move
+  const idx = Math.floor(Math.random() * candidates.length);
+  return candidates[idx]!;
+}
+
+function getAIMoveMedium(board: Board): Position {
   const candidates = getCandidates(board);
 
   // Check if AI can win immediately
@@ -48,3 +68,16 @@ export function getAIMove(board: Board): Position {
 
   return bestMove;
 }
+
+export function getAIMove(board: Board, difficulty: Difficulty = 'medium'): Position {
+  switch (difficulty) {
+    case 'easy':
+      return getAIMoveEasy(board);
+    case 'hard':
+      return getAIMoveHard(board);
+    case 'medium':
+    default:
+      return getAIMoveMedium(board);
+  }
+}
+
