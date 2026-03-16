@@ -1,6 +1,6 @@
 'use client';
 
-import { useReducer, useEffect, useCallback } from 'react';
+import { useReducer, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Board from '@/components/Board';
 import GameStatus from '@/components/GameStatus';
@@ -111,7 +111,7 @@ function parseDifficulty(value: string | null): Difficulty {
   return 'medium';
 }
 
-export default function GamePage() {
+function GamePageInner() {
   const searchParams = useSearchParams();
   const difficulty = parseDifficulty(searchParams.get('difficulty'));
 
@@ -186,6 +186,14 @@ export default function GamePage() {
         />
       </div>
     </main>
+  );
+}
+
+export default function GamePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 flex items-center justify-center" />}>
+      <GamePageInner />
+    </Suspense>
   );
 }
 
